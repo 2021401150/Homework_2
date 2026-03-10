@@ -161,8 +161,8 @@ Plot explanation:
 
 ## Comparison of Version 1 and Version 2
 
-| Aspect | Version 1 | Version 2 | Practical Effect |
-|---|---|---|---|
+| Aspect | Version 1 | Version 2 | 
+|---|---|---|
 | Target computation | Standard DQN target | Double-DQN style target |
 | Logging/plots | Reward + RPS | Reward + RPS + Loss | 
 
