@@ -1,15 +1,3 @@
-"""
-Deep Q-Network (DQN) for Robot Object Pushing Task
-Supports both pixel-based (CNN) and high-level state inputs.
-
-Core algorithmic pieces in this implementation:
-- epsilon-greedy exploration,
-- replay buffer for decorrelated training batches,
-- target network to stabilize Bellman targets,
-- Double-DQN style target action selection,
-- periodic plotting/checkpoint-style output for monitoring.
-"""
-
 import random
 import collections
 import os
@@ -18,21 +6,33 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+
 from homework2 import Hw2Env
 
-# ─────────────────────────────────────────────
+#Version 2
+
+#This script supports both pixel-based (CNN) and high-level state inputs.
+#Core algorithmic pieces in this implementation:
+# - epsilon-greedy exploration,
+# - replay buffer for decorrelated training batches,
+# - target network to stabilize Bellman targets,
+# - Double-DQN style target action selection,
+# - periodic plotting/checkpoint-style output for monitoring.
+
+
+
 # Hyperparameters
 # ─────────────────────────────────────────────
 N_ACTIONS            = 8
 GAMMA                = 0.99
 EPSILON              = 1.0
 EPSILON_DECAY        = 0.999
-EPSILON_DECAY_ITER   = 10        # decay every N gradient updates
+EPSILON_DECAY_ITER   = 10       
 MIN_EPSILON          = 0.1
 LEARNING_RATE        = 1e-4
 BATCH_SIZE           = 32
-UPDATE_FREQ          = 4         # env steps between gradient updates
-TARGET_UPDATE_FREQ   = 100       # gradient updates between target-net syncs
+UPDATE_FREQ          = 4         
+TARGET_UPDATE_FREQ   = 100       
 BUFFER_LENGTH        = 10_000
 N_EPISODES           = 3000
 USE_HIGH_LEVEL_STATE = True     # set True for faster experimentation
@@ -43,8 +43,8 @@ PLOT_OUTPUT_DIR = "version_2"
 # Store all curves for this variant in a dedicated directory.
 os.makedirs(PLOT_OUTPUT_DIR, exist_ok=True)
 
-# ─────────────────────────────────────────────
-# State Normalization (high-level state only)
+
+# State Normalization 
 # x ∈ [0.25, 0.75] → [-1, 1],  y ∈ [-0.3, 0.3] → [-1, 1]
 # ─────────────────────────────────────────────
 _X_MEAN, _X_RANGE = 0.5, 0.25
@@ -59,7 +59,7 @@ def normalize_state(state: np.ndarray) -> np.ndarray:
     return state
 
 
-# ─────────────────────────────────────────────
+
 # Replay Buffer
 # ─────────────────────────────────────────────
 Transition = collections.namedtuple(
@@ -86,7 +86,7 @@ class ReplayBuffer:
         return len(self.buffer)
 
 
-# ─────────────────────────────────────────────
+
 # Networks
 # ─────────────────────────────────────────────
 class CNNQNetwork(nn.Module):
@@ -126,7 +126,7 @@ class MLPQNetwork(nn.Module):
         return self.net(x)
 
 
-# ─────────────────────────────────────────────
+
 # DQN Agent
 # ─────────────────────────────────────────────
 class DQNAgent:
@@ -136,7 +136,7 @@ class DQNAgent:
         self.n_actions = n_actions
         self.use_high_level = use_high_level
         self.epsilon = EPSILON
-        # Counts gradient updates (not environment steps).
+        # Counts gradient updates.
         self._update_count = 0
 
         if use_high_level:
@@ -227,7 +227,7 @@ class DQNAgent:
         return loss.item()
 
 
-# ─────────────────────────────────────────────
+
 # Training Loop
 # ─────────────────────────────────────────────
 def train():
@@ -298,7 +298,7 @@ def train():
     return agent, episode_rewards, episode_rps
 
 
-# ─────────────────────────────────────────────
+
 # Plotting
 # ─────────────────────────────────────────────
 def smooth(arr, window=20):
@@ -364,7 +364,7 @@ def plot_results(rewards, rps, losses=None, save_path="dqn_training_curves.png")
     plt.close()
 
 
-# ─────────────────────────────────────────────
+
 # Evaluation helper
 # ─────────────────────────────────────────────
 def evaluate(model_path: str = "dqn_policy.pt", n_episodes: int = 10):

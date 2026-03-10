@@ -7,6 +7,10 @@ import random
 import matplotlib.pyplot as plt
 import os
 
+from homework2 import Hw2Env
+
+# Version 1
+
 # This script trains a DQN agent for Hw2Env using either:
 # 1) pixel observations with a CNN Q-network, or
 # 2) compact high-level state with an MLP Q-network.
@@ -17,27 +21,23 @@ import os
 # - epsilon-greedy exploration,
 # - Huber loss + gradient clipping for stability.
 
-# ──────────────────────────────────────────────
-# Set env vars for headless rendering if needed
-# ──────────────────────────────────────────────
-# os.environ["MUJOCO_GL"] = "egl"
-# os.environ["PYOPENGL_PLATFORM"] = "egl"
 
-from homework2 import Hw2Env
 
-# ──────────────────────────────────────────────
+
+
+
 # Hyperparameters
 # ──────────────────────────────────────────────
 N_ACTIONS          = 8
 GAMMA              = 0.99
 EPSILON            = 1.0
-EPSILON_DECAY      = 0.999   # was 0.999 — reaches MIN_EPSILON ~ep 250
-EPSILON_DECAY_ITER = 10       # was 10 — decay more frequently
+EPSILON_DECAY      = 0.999  
+EPSILON_DECAY_ITER = 10       
 MIN_EPSILON        = 0.1
 LEARNING_RATE      = 1e-4
 BATCH_SIZE         = 32
-UPDATE_FREQ        = 4         # env steps between network updates
-TARGET_UPDATE_FREQ = 100       # network updates between target-net syncs
+UPDATE_FREQ        = 4         
+TARGET_UPDATE_FREQ = 100       
 BUFFER_LENGTH      = 10_000
 N_EPISODES         = 3000       # total training episodes
 USE_PIXELS         = False      # set False to use high_level_state
@@ -124,7 +124,7 @@ class DQNHighLevel(nn.Module):
         return self.net(x)
 
 
-# ──────────────────────────────────────────────
+
 # DQN Agent
 # ──────────────────────────────────────────────
 class DQNAgent:
@@ -214,7 +214,7 @@ class DQNAgent:
         print(f"  ✓ checkpoint loaded ← {path}")
 
 
-# ──────────────────────────────────────────────
+
 # Training loop
 # ──────────────────────────────────────────────
 def train():
@@ -293,7 +293,6 @@ def train():
     return agent, rewards_history, rps_history
 
 
-# ──────────────────────────────────────────────
 # Plotting
 # ──────────────────────────────────────────────
 def moving_avg(data, window=20):
@@ -336,8 +335,7 @@ def plot_curves(rewards, rps_list, episode, final=False):
     print(f"  ✓ plot saved → {fname}")
 
 
-# ──────────────────────────────────────────────
-# Entry point
+
 # ──────────────────────────────────────────────
 if __name__ == "__main__":
     train()

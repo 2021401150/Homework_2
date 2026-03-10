@@ -6,7 +6,6 @@ This folder contains my CMPE591 Homework 2 solution. The goal is to train a Deep
 
 In this homework, the agent interacts with `Hw2Env` and selects one of `N_ACTIONS = 8` actions at each step.
 
-- Episode termination: `done = is_terminal or is_truncated`
 - Reward function:
   - `reward = 1 / distance(ee, obj) + 1 / distance(obj, goal)`
 
@@ -114,7 +113,6 @@ Detailed design:
   - gradient clipping.
 - Checkpointing:
   - saves online net + target net + epsilon + update counter every 50 episodes,
-  - easiest version for exact resume of interrupted training.
 
 ### Version 1 Final Plot
 
@@ -165,11 +163,8 @@ Plot explanation:
 
 | Aspect | Version 1 | Version 2 | Practical Effect |
 |---|---|---|---|
-| Target computation | Standard DQN target | Double-DQN style target | Version 2 is typically less overestimation-prone. |
-| Code structure | Compact and direct | More modular and diagnostic-focused | Version 2 is easier to debug and extend. |
-| Logging/plots | Reward + RPS | Reward + RPS + Loss | Version 2 provides richer training visibility. |
-| Checkpointing | Full training state | Policy weights only | Version 1 is better for exact resume. |
-| Default mode | High-level state (`USE_PIXELS=False`) | High-level state (`USE_HIGH_LEVEL_STATE=True`) | Both are configured for faster non-pixel training. |
+| Target computation | Standard DQN target | Double-DQN style target |
+| Logging/plots | Reward + RPS | Reward + RPS + Loss | 
 
 Result-level comparison from final plots:
 
@@ -180,8 +175,6 @@ Result-level comparison from final plots:
 ## Conclusion
 
 - Both implementations satisfy the homework objective and learn useful pushing behavior.
-- Version 1 is preferable when resumability and training continuity are priorities.
-- Version 2 is preferable when analysis quality and training diagnostics are priorities.
 - For both versions, smoothed reward and smoothed RPS should be used for final performance judgment, not single-episode fluctuations.
 
 ## Requirements
