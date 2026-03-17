@@ -218,6 +218,14 @@ The project also includes expanded experiment outputs:
 - `src/version_3/dqn_training_curves.png`
 - `src/version_4/dqn_training_curves.png`
 
+### Version 3 Final Plot
+
+![Version 3 Final Training Curves](src/version_3/dqn_training_curves.png)
+
+### Version 4 Final Plot
+
+![Version 4 Final Training Curves](src/version_4/dqn_training_curves.png)
+
 These runs use larger replay buffers, larger batch sizes, and longer epsilon decay compared to the base setup. In practice, these settings are intended to improve stability and smooth long-horizon learning trends, especially in high-level state mode.
 
 ## Run-by-Run Hyperparameter Change Analysis
