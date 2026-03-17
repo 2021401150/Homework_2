@@ -25,16 +25,15 @@ from homework2 import Hw2Env
 # ─────────────────────────────────────────────
 N_ACTIONS            = 8
 GAMMA                = 0.99
-EPSILON              = 1.0
-EPSILON_DECAY        = 0.999
-EPSILON_DECAY_ITER   = 10       
-MIN_EPSILON          = 0.1
+EPS_START            = 1
+EPS_END              = 0.05
+EPS_DECAY            = 10000
 LEARNING_RATE        = 1e-4
-BATCH_SIZE           = 32
-UPDATE_FREQ          = 4         
-TARGET_UPDATE_FREQ   = 100       
+BATCH_SIZE           = 128
+UPDATE_FREQ          = 4
+TAU                  = 0.01
 BUFFER_LENGTH        = 10_000
-N_EPISODES           = 3000
+N_EPISODES           = 2500
 USE_HIGH_LEVEL_STATE = True     # set True for faster experimentation
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -135,9 +134,11 @@ class DQNAgent:
     def __init__(self, n_actions: int, use_high_level: bool = False):
         self.n_actions = n_actions
         self.use_high_level = use_high_level
-        self.epsilon = EPSILON
+        self.epsilon = EPS_START
         # Counts gradient updates.
         self._update_count = 0
+       
+        self.steps_done = 0
 
         if use_high_level:
             self.policy_net = MLPQNetwork(n_actions).to(DEVICE)
@@ -173,6 +174,10 @@ class DQNAgent:
     # ── action selection ─────────────────────
     @torch.no_grad()
     def select_action(self, state):
+        
+        self.epsilon = EPS_END + (EPS_START - EPS_END) * np.exp(-1.0 * self.steps_done / EPS_DECAY)
+        self.steps_done += 1
+
         # Epsilon-greedy: random action for exploration, argmax for exploitation.
         if random.random() < self.epsilon:
             return random.randrange(self.n_actions)
@@ -211,18 +216,14 @@ class DQNAgent:
         self.optimizer.zero_grad()
         loss.backward()
         # Gradient clipping helps avoid instability from rare large TD errors.
-        nn.utils.clip_grad_norm_(self.policy_net.parameters(), 10.0)
+        nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1.0)
         self.optimizer.step()
 
         self._update_count += 1
 
-        # Decay epsilon
-        if self._update_count % EPSILON_DECAY_ITER == 0:
-            self.epsilon = max(MIN_EPSILON, self.epsilon * EPSILON_DECAY)
-
-        # Sync target network
-        if self._update_count % TARGET_UPDATE_FREQ == 0:
-            self.target_net.load_state_dict(self.policy_net.state_dict())
+        # Soft target update: θ_target ← τ θ_policy + (1 - τ) θ_target
+        for target_param, policy_param in zip(self.target_net.parameters(), self.policy_net.parameters()):
+            target_param.data.copy_(TAU * policy_param.data + (1.0 - TAU) * target_param.data)
 
         return loss.item()
 

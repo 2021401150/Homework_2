@@ -30,16 +30,15 @@ from homework2 import Hw2Env
 # ──────────────────────────────────────────────
 N_ACTIONS          = 8
 GAMMA              = 0.99
-EPSILON            = 1.0
-EPSILON_DECAY      = 0.999  
-EPSILON_DECAY_ITER = 10       
-MIN_EPSILON        = 0.1
+EPS_START          = 0.9
+EPS_END            = 0.05
+EPS_DECAY          = 10000
 LEARNING_RATE      = 1e-4
-BATCH_SIZE         = 32
-UPDATE_FREQ        = 4         
-TARGET_UPDATE_FREQ = 100       
+BATCH_SIZE         = 128
+UPDATE_FREQ        = 4
+TAU                = 0.01
 BUFFER_LENGTH      = 10_000
-N_EPISODES         = 3000       # total training episodes
+N_EPISODES         = 2500       # total training episodes
 USE_PIXELS         = False      # set False to use high_level_state
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -144,13 +143,19 @@ class DQNAgent:
 
         self.optimizer  = optim.Adam(self.online_net.parameters(), lr=LEARNING_RATE)
         self.buffer     = ReplayBuffer(BUFFER_LENGTH)
-        self.epsilon    = EPSILON
+        self.epsilon    = EPS_START
         self.n_actions  = n_actions
         # Counts gradient updates (distinct from env steps/episodes).
         self.update_count = 0
+        
+        self.steps_done = 0
 
     # ── action selection ──
     def select_action(self, state) -> int:
+        
+        self.epsilon = EPS_END + (EPS_START - EPS_END) * np.exp(-1.0 * self.steps_done / EPS_DECAY)
+        self.steps_done += 1
+
         # Explore with probability epsilon, otherwise exploit current Q-values.
         if random.random() < self.epsilon:
             return random.randint(0, self.n_actions - 1)
@@ -186,13 +191,9 @@ class DQNAgent:
 
         self.update_count += 1
 
-        # Decay epsilon
-        if self.update_count % EPSILON_DECAY_ITER == 0:
-            self.epsilon = max(MIN_EPSILON, self.epsilon * EPSILON_DECAY)
-
-        # Sync target network
-        if self.update_count % TARGET_UPDATE_FREQ == 0:
-            self.target_net.load_state_dict(self.online_net.state_dict())
+        # Soft target update: θ_target ← τ θ_online + (1 - τ) θ_target
+        for target_param, online_param in zip(self.target_net.parameters(), self.online_net.parameters()):
+            target_param.data.copy_(TAU * online_param.data + (1.0 - TAU) * target_param.data)
 
     def save(self, path: str):
         # Save full training state for resuming later.
@@ -201,6 +202,7 @@ class DQNAgent:
             "target": self.target_net.state_dict(),
             "epsilon": self.epsilon,
             "update_count": self.update_count,
+            "steps_done": self.steps_done,
         }, path)
         print(f"  ✓ checkpoint saved → {path}")
 
@@ -209,8 +211,9 @@ class DQNAgent:
         ckpt = torch.load(path, map_location=DEVICE)
         self.online_net.load_state_dict(ckpt["online"])
         self.target_net.load_state_dict(ckpt["target"])
-        self.epsilon    = ckpt["epsilon"]
+        self.epsilon      = ckpt["epsilon"]
         self.update_count = ckpt["update_count"]
+        self.steps_done   = ckpt.get("steps_done", 0)
         print(f"  ✓ checkpoint loaded ← {path}")
 
 
