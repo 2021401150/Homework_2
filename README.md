@@ -94,6 +94,24 @@ N_EPISODES         = 2500
 USE_PIXELS         = False
 ```
 
+### Version 3 (tuned configuration)
+
+```python
+N_ACTIONS            = 8
+GAMMA                = 0.99
+EPS_START            = 1
+EPS_END              = 0.05
+EPS_DECAY            = 20000
+LEARNING_RATE        = 3e-4
+BATCH_SIZE           = 256
+UPDATE_FREQ          = 4
+TAU                  = 0.002
+BUFFER_LENGTH        = 100_000
+N_EPISODES           = 3000
+USE_HIGH_LEVEL_STATE = True
+```
+
+
 ### Version 4 (tuned configuration)
 
 ```python
@@ -111,22 +129,6 @@ N_EPISODES           = 5000
 USE_HIGH_LEVEL_STATE = True
 ```
 
-### Version 3 (tuned configuration)
-
-```python
-N_ACTIONS            = 8
-GAMMA                = 0.99
-EPS_START            = 1
-EPS_END              = 0.05
-EPS_DECAY            = 20000
-LEARNING_RATE        = 3e-4
-BATCH_SIZE           = 256
-UPDATE_FREQ          = 4
-TAU                  = 0.002
-BUFFER_LENGTH        = 100_000
-N_EPISODES           = 3000
-USE_HIGH_LEVEL_STATE = True
-```
 
 ## How to Run
 
